@@ -2,6 +2,7 @@
 
 DS2408::DS2408(uint8_t ID1, uint8_t ID2, uint8_t ID3, uint8_t ID4, uint8_t ID5, uint8_t ID6, uint8_t ID7) : OneWireItem(ID1, ID2, ID3, ID4, ID5, ID6, ID7)
 {
+	lastReceivedCmd = 0;
     clearMemory();
 }
 
@@ -13,6 +14,8 @@ void DS2408::duty(OneWireHub * const hub)
 
     if (hub->recv(&cmd,1,crc)) return;
 
+	lastReceivedCmd = cmd;
+	
     switch (cmd)
     {
         case 0xF0:      // Read PIO Registers
@@ -117,6 +120,12 @@ uint8_t DS2408::getPinState(void) const
     return memory[REG_PIO_LOGIC];
 }
 
+void DS2408::setPinState(uint8_t u8PinState)
+{
+    memory[REG_PIO_LOGIC] = u8PinState;
+    memory[REG_PIO_OUTPUT] = u8PinState; // for consistant One-Wire Read response
+}
+
 void DS2408::setPinActivity(const uint8_t pinNumber, const bool value)
 {
     if (value)  memory[REG_PIO_ACTIVITY] |=  (1<<pinNumber);
@@ -131,4 +140,11 @@ bool DS2408::getPinActivity(const uint8_t pinNumber) const
 uint8_t DS2408::getPinActivity(void) const
 {
     return memory[REG_PIO_ACTIVITY];
+}
+
+uint8_t DS2408::getLastReceivedCmd(void)
+{
+	uint8_t bReturn = lastReceivedCmd;
+	lastReceivedCmd = 0; // reset flag
+    return bReturn;
 }

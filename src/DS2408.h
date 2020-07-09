@@ -1,6 +1,7 @@
 // 8-Channel Addressable Switch @@@
 // works, but no alarm search and higher logic / output / control register-action
 // native bus-features: Overdrive capable, alarm search
+// add function to get latest received 1-wire command
 
 #ifndef ONEWIRE_DS2408_H
 #define ONEWIRE_DS2408_H
@@ -25,7 +26,7 @@ private:
     static constexpr uint8_t  REG_RD_ABOVE_ALWAYS_FF_8F { 7 }; // 0x8F - these bytes give always 0xFF
 
     uint8_t memory[MEM_SIZE];
-
+	uint8_t lastReceivedCmd;
 public:
 
     static constexpr uint8_t family_code                { 0x29 };
@@ -39,11 +40,13 @@ public:
     void    setPinState(uint8_t pinNumber, bool value);
     bool    getPinState(uint8_t pinNumber) const;
     uint8_t getPinState(void) const;
+	void 	setPinState(uint8_t u8PinState);
 
     void    setPinActivity(uint8_t pinNumber, bool value);
     bool    getPinActivity(uint8_t pinNumber) const;
     uint8_t getPinActivity(void) const;
 
+	uint8_t	getLastReceivedCmd(void);
     // TODO: do we need FN to set the output register?
 
 };
