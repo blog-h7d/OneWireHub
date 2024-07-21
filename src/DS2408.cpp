@@ -40,9 +40,23 @@ void DS2408::duty(OneWireHub * const hub)
             while(true)
             {
                 if (hub->recv(&data,1)) return;
-                if (hub->recv(&cmd ,1)) return; // just because we have to receive something
-                //if (cmd != ~data) return false; //inverted data, not working properly
-
+                if (hub->recv(&cmd ,1)) return;
+				// Die Datenbits werden zusätzlich invertiert übertragen (leider keine CRC für dieses Kommando)
+				// Prüfung funktioniert nur wenn es in eine Variable reinkopiert wird
+				uint8_t dataInverted = ~cmd;
+                if (data != dataInverted)
+				{
+/*					
+					Serial.println("Cmd 0x5A receive Error!!! data= ");
+					Serial.println(data);
+					Serial.println("inverted data= ");
+					Serial.println(dataInverted);
+*/
+					return false;
+				}
+//				else
+//					Serial.println("Cmd 0x5A ok");
+					
                 memory[REG_PIO_ACTIVITY] |= data ^ memory[REG_PIO_LOGIC];
                 memory[REG_PIO_OUTPUT]   = data;
                 memory[REG_PIO_LOGIC]    = data;
